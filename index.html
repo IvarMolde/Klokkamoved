@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="no">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Klokka på norsk</title>
+<style>
+*{box-sizing:border-box}
+:root{--blue:#2458a6;--blue-dark:#173d75;--light:#f4f6f8;--border:#d8dee6;--text:#202833;--muted:#657180;--green:#16724c;--red:#a72e2e}
+body{margin:0;background:var(--light);color:var(--text);font-family:Arial,Helvetica,sans-serif;line-height:1.6;font-size:18px}
+header{background:#fff;border-bottom:1px solid var(--border)}
+.header-inner{max-width:1100px;margin:auto;padding:24px 20px 18px}
+h1{margin:0;font-size:36px;font-weight:700;line-height:1.2}.intro{margin:8px 0 0;color:#435164;font-size:19px}
+nav{max-width:1100px;margin:auto;padding:0 20px;display:flex;gap:4px}
+.nav-btn{appearance:none;border:0;background:#fff;color:#243247;padding:15px 18px;cursor:pointer;font-weight:700;font-size:17px;border-bottom:4px solid transparent}
+.nav-btn:hover{background:#f2f5f8}.nav-btn.active{color:var(--blue);border-bottom-color:var(--blue)}
+main{max-width:1180px;margin:28px auto;padding:0 22px}
+.page{display:none}.page.active{display:block}
+.card{background:#fff;border:1px solid #c5ced9;border-radius:14px;padding:28px;margin-bottom:22px;box-shadow:0 3px 12px rgba(20,35,55,.06)}
+h2{margin:0 0 10px;font-size:28px;line-height:1.25}h3{margin-top:0;font-size:21px}
+.lead{color:#435164;margin-top:0;font-size:18px}
+.notice{background:#eaf2ff;color:#172b49;border-left:5px solid #174ea6;padding:16px 18px;margin:20px 0;border-radius:6px}
+.rules{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.rule{border:1px solid #c5ced9;padding:16px;border-radius:9px;background:#f8fafc;font-size:17px}
+.rule b{display:block;color:var(--blue);margin-bottom:5px}
+.game{display:grid;grid-template-columns:380px 1fr;gap:35px;align-items:center}
+.clock-area{text-align:center}
+.clock{width:320px;height:320px;margin:auto;border:8px solid #17202b;border-radius:50%;background:white;position:relative}
+.clock-number{position:absolute;inset:0;text-align:center;font-size:23px;font-weight:bold;padding-top:12px;color:#111827}
+.clock-number span{display:block}
+.n1{transform:rotate(30deg)}.n1 span{transform:rotate(-30deg)}
+.n12{transform:rotate(0deg)}.n12 span{transform:rotate(0deg)}
+.n2{transform:rotate(60deg)}.n2 span{transform:rotate(-60deg)}
+.n3{transform:rotate(90deg)}.n3 span{transform:rotate(-90deg)}
+.n4{transform:rotate(120deg)}.n4 span{transform:rotate(-120deg)}
+.n5{transform:rotate(150deg)}.n5 span{transform:rotate(-150deg)}
+.n6{transform:rotate(180deg)}.n6 span{transform:rotate(-180deg)}
+.n7{transform:rotate(210deg)}.n7 span{transform:rotate(-210deg)}
+.n8{transform:rotate(240deg)}.n8 span{transform:rotate(-240deg)}
+.n9{transform:rotate(270deg)}.n9 span{transform:rotate(-270deg)}
+.n10{transform:rotate(300deg)}.n10 span{transform:rotate(-300deg)}
+.n11{transform:rotate(330deg)}.n11 span{transform:rotate(-330deg)}
+.hand{position:absolute;left:50%;bottom:50%;transform-origin:50% 100%;border-radius:5px}
+.hour{height:27%;width:10px;background:#202833}.minute{height:39%;width:6px;background:var(--blue)}
+.center{position:absolute;width:17px;height:17px;left:50%;top:50%;transform:translate(-50%,-50%);background:var(--blue);border:3px solid white;border-radius:50%}
+.digital{font-size:25px;font-weight:800;margin-top:12px;color:#17202b}
+.question{font-size:26px;font-weight:800;margin:0 0 18px;line-height:1.3}
+.answers{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.answer{background:#fff;border:2px solid #aeb9c7;border-radius:9px;padding:16px;text-align:left;cursor:pointer;font-weight:bold;color:#17202b;font-size:17px;min-height:56px}
+.answer:hover{border-color:var(--blue);background:#f7faff}.answer.correct{border-color:var(--green);background:#edf8f2}.answer.wrong{border-color:var(--red);background:#fff1f1}
+.feedback{padding:13px 15px;border-radius:8px;margin-top:15px}.good{background:#edf8f2;color:#0c5c3b}.bad{background:#fff1f1;color:#842424}
+button.primary,button.secondary{border:0;border-radius:8px;padding:13px 18px;font-weight:bold;cursor:pointer;font-size:17px;min-height:48px}
+.primary{background:var(--blue);color:white}.primary:hover{background:var(--blue-dark)}
+.secondary{background:#e4e9f0;color:#17202b;border:1px solid #aeb9c7}
+.actions{margin-top:16px;display:flex;gap:9px;flex-wrap:wrap}
+.progress{height:8px;background:#e5e9ee;border-radius:10px;margin:10px 0 22px;overflow:hidden}.progress div{height:100%;background:var(--blue);width:0}
+.stats{display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap}.stat{background:white;border:1px solid #c5ced9;border-radius:9px;padding:12px 17px}.stat strong{font-size:19px}.stat span{display:block;font-size:12px;color:var(--muted)}
+select{padding:12px;border:2px solid #9aa8b8;border-radius:7px;background:#fff;font-size:18px;color:#17202b;min-height:48px}
+.selects{display:flex;gap:16px;margin:20px 0;flex-wrap:wrap}.selects label{display:flex;flex-direction:column;gap:5px;font-weight:bold}
+.match{display:grid;grid-template-columns:1fr 1fr;gap:18px}.match-box{border:1px solid var(--border);border-radius:8px;padding:18px}
+.items{display:flex;flex-wrap:wrap;gap:9px}.item{border:1px solid #cbd3dd;background:#f8fafc;border-radius:6px;padding:10px 12px;cursor:pointer;font-weight:bold}.item.selected{outline:3px solid #b9cff2}.item.done{opacity:.35;cursor:default}
+.small{font-size:16px;color:#435164}
+button:focus-visible,select:focus-visible{outline:3px solid #ffbf47;outline-offset:3px}
+button:disabled{opacity:.65;cursor:not-allowed}
+#teacher .game{grid-template-columns:minmax(260px,380px) minmax(260px,1fr);gap:28px}
+#teacher .clock-area{padding:8px}
+#teacherDigitalArea{min-height:220px;display:flex;flex-direction:column;justify-content:center;align-items:center;background:#f8fafc;border:1px solid #c5ced9;border-radius:12px}
+#teacherDigital{font-size:clamp(42px,6vw,64px)!important;color:#17202b}
+@media(max-width:800px){#teacher .game{grid-template-columns:1fr}}
+[hidden]{display:none!important}
+#teacherDigitalArea{min-height:180px;display:flex;flex-direction:column;justify-content:center;align-items:center}
+@media(max-width:800px){.rules{grid-template-columns:1fr 1fr}.game{grid-template-columns:1fr}.clock{width:280px;height:280px}.answers{grid-template-columns:1fr}}
+@media(max-width:520px){nav{overflow-x:auto}.nav-btn{white-space:nowrap}.rules{grid-template-columns:1fr}.match{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+<div class="header-inner">
+<h1>Klokka på norsk</h1>
+<p class="intro">Øv på å forstå og si klokkeslett på norsk.</p>
+</div>
+<nav aria-label="Hovedmeny">
+<button type="button" class="nav-btn active" data-page="learn">Lær</button>
+<button type="button" class="nav-btn" data-page="quiz">Velg riktig</button>
+<button type="button" class="nav-btn" data-page="set">Still klokka</button>
+<button type="button" class="nav-btn" data-page="teacher">Lærerøvelse</button>
+<button type="button" class="nav-btn" data-page="match">Match</button>
+</nav>
+</header>
+
+<main>
+<section id="learn" class="page active">
+<div class="card">
+<h2>Slik sier vi klokka</h2>
+<p class="lead">Du kan klokka allerede. Her lærer du hvordan vi sier klokkeslettet på norsk.</p>
+<div class="notice"><strong>Husk «halv»:</strong> 03:30 heter <strong>halv fire</strong>. Vi sier altså timen som kommer etterpå. 03:20 er «ti på halv fire», og 03:40 er «ti over halv fire».</div>
+<div class="rules" id="rules"></div>
+</div>
+</section>
+
+<section id="quiz" class="page">
+<div class="stats"><div class="stat"><strong id="score">0</strong><span>poeng</span></div><div class="stat"><strong id="streak">0</strong><span>på rad</span></div><div class="stat"><strong id="done">0</strong><span>besvart</span></div></div>
+<div class="card">
+<div class="small">Velg uttrykket som passer til klokka.</div>
+<div class="progress"><div id="bar"></div></div>
+<div class="game">
+<div class="clock-area"><div class="clock" id="quizClock"></div><div class="digital" id="quizDigital"></div></div>
+<div><p class="question">Hva er klokka?</p><div class="answers" id="answers"></div><div id="quizFeedback"></div><div class="actions"><button type="button" class="primary" id="quizNext" hidden>Neste oppgave</button></div></div>
+</div>
+</div>
+</section>
+
+<section id="set" class="page">
+<div class="card">
+<div class="small">Velg klokkeslettet som passer til uttrykket.</div>
+<div class="game">
+<div class="clock-area"><div class="clock" id="setClock"></div></div>
+<div><p class="question" id="setQuestion"></p>
+<div class="selects"><label>Time<select id="hour"></select></label><label>Minutt<select id="minute"></select></label></div>
+<div class="actions"><button type="button" class="primary" id="checkSet">Sjekk</button><button type="button" class="secondary" id="newSet">Ny oppgave</button></div>
+<div id="setFeedback"></div></div>
+</div>
+</div>
+</section>
+
+
+<section id="teacher" class="page">
+ <div class="card">
+  <h2>Lærerøvelse: Analog og digital klokke</h2>
+  <p class="lead">Læreren stiller klokka. Elevene sier klokkeslettet høyt eller skriver svaret sitt. Bruk deretter «Vis sammenhengen» for å sammenligne analog og digital klokke.</p>
+  <div class="notice"><strong>Slik gjør dere:</strong> Velg hvilken klokke elevene skal se. Still time og minutt. Spør «Hva er klokka?». Når elevene har svart, kan du vise den andre klokka og sammenligne.</div>
+  <div class="actions" role="group" aria-label="Velg klokketype">
+   <button type="button" class="primary" id="showAnalogMode">Analog klokke</button>
+   <button type="button" class="secondary" id="showDigitalMode">Digital klokke</button>
+  </div>
+  <div class="selects">
+   <label>Time
+    <select id="teacherHour" aria-label="Velg time"></select>
+   </label>
+   <label>Minutt
+    <select id="teacherMinute" aria-label="Velg minutt"></select>
+   </label>
+  </div>
+  <div class="game">
+   <div class="clock-area" id="teacherAnalogArea">
+    <div class="clock" id="teacherClock"></div>
+    <div class="small">Analog klokke</div>
+   </div>
+   <div class="clock-area" id="teacherDigitalArea" hidden>
+    <div class="digital" id="teacherDigital" style="font-size:48px;margin:45px 0"></div>
+    <div class="small">Digital klokke</div>
+   </div>
+   <div>
+    <p class="question">Hva er klokka?</p>
+    <p>La elevene svare før du viser fasiten.</p>
+    <div class="actions">
+     <button type="button" class="primary" id="revealTeacher">Vis sammenhengen</button>
+     <button type="button" class="secondary" id="randomTeacher">Tilfeldig klokkeslett</button>
+    </div>
+    <div id="teacherRelationNote" class="notice" hidden aria-live="polite">
+      Begge klokkene viser samme tidspunkt. Sammenlign viserne med tallene på den digitale klokka.
+    </div>
+   </div>
+  </div>
+  <div class="notice">
+   <strong>Tips:</strong> La elevene først si klokkeslettet med ord, for eksempel «halv fire». Be dem deretter lese det digitale klokkeslettet, for eksempel «15:30». Snakk om at begge viser samme tidspunkt.
+  </div>
+ </div>
+</section>
+
+<section id="match" class="page">
+<div class="card">
+<div class="small">Finn riktig par. Klikk først på et klokkeslett og deretter på uttrykket.</div>
+<h2>Match klokkeslett og uttrykk</h2>
+<div class="match">
+<div class="match-box"><h3>Klokkeslett</h3><div class="items" id="matchTimes"></div></div>
+<div class="match-box"><h3>Uttrykk</h3><div class="items" id="matchPhrases"></div></div>
+</div>
+<div id="matchFeedback"></div>
+<div class="actions"><button type="button" class="primary" id="newMatch">Ny runde</button></div>
+</div>
+</section>
+</main>
+
+<script>
+"use strict";
+const patterns=[
+["Hel",0,"Klokka er {h}."],["Fem over",5,"Klokka er fem over {h}."],
+["Ti over",10,"Klokka er ti over {h}."],["Kvart over",15,"Klokka er kvart over {h}."],
+["Ti på halv",20,"Klokka er ti på halv {next}."],["Fem på halv",25,"Klokka er fem på halv {next}."],
+["Halv",30,"Klokka er halv {next}."],["Fem over halv",35,"Klokka er fem over halv {next}."],
+["Ti over halv",40,"Klokka er ti over halv {next}."],["Kvart på",45,"Klokka er kvart på {next}."],
+["Ti på",50,"Klokka er ti på {next}."],["Fem på",55,"Klokka er fem på {next}."]
+];
+const words=["tolv","ett","to","tre","fire","fem","seks","sju","åtte","ni","ti","elleve"];
+const $=id=>document.getElementById(id);
+function hourWord(h){return words[h%12]}
+function nextWord(h){return words[(h+1)%12]}
+function phrase(h,m){const p=patterns.find(x=>x[1]===m);return p[2].replace("{h}",hourWord(h)).replace("{next}",nextWord(h))}
+function fmt(h,m){return String(h).padStart(2,"0")+":"+String(m).padStart(2,"0")}
+function randomTime(){return {h:1+Math.floor(Math.random()*12),m:patterns[Math.floor(Math.random()*patterns.length)][1]}}
+function drawClock(el,h,m){
+ el.innerHTML="";
+ for(let i=1;i<=12;i++){let n=document.createElement("div");n.className="clock-number n"+i;n.innerHTML="<span>"+i+"</span>";el.appendChild(n)}
+ let min=document.createElement("div");min.className="hand minute";min.style.transform="translateX(-50%) rotate("+(m*6)+"deg)";
+ let hr=document.createElement("div");hr.className="hand hour";hr.style.transform="translateX(-50%) rotate("+((h%12)*30+m*.5)+"deg)";
+ let c=document.createElement("div");c.className="center";el.append(min,hr,c)
+}
+function showPage(id){
+ document.querySelectorAll(".page").forEach(p=>p.classList.toggle("active",p.id===id));
+ document.querySelectorAll(".nav-btn").forEach(b=>b.classList.toggle("active",b.dataset.page===id));
+ if(id==="quiz")newQuiz();if(id==="set")newSet();if(id==="match")newMatch();
+ window.scrollTo({top:0,behavior:"smooth"});
+}
+document.querySelectorAll(".nav-btn").forEach(btn=>btn.addEventListener("click",()=>showPage(btn.dataset.page)));
+
+patterns.forEach(p=>{let d=document.createElement("div");d.className="rule";d.innerHTML="<b>"+p[0]+"</b>03:"+String(p[1]).padStart(2,"0")+" → "+phrase(3,p[1]);$("rules").appendChild(d)});
+
+let score=0,streak=0,done=0,q=0,quizTime;
+function stats(){ $("score").textContent=score;$("streak").textContent=streak;$("done").textContent=done;$("bar").style.width=((q%10)*10)+"%"; }
+function newQuiz(){
+ quizTime=randomTime();q++;stats();drawClock($("quizClock"),quizTime.h,quizTime.m);$("quizDigital").textContent=fmt(quizTime.h,quizTime.m);
+ $("quizFeedback").innerHTML="";$("quizNext").hidden=true;
+ let correct=phrase(quizTime.h,quizTime.m), options=[correct];
+ while(options.length<4){let t=randomTime(),p=phrase(t.h,t.m);if(!options.includes(p))options.push(p)}
+ options.sort(()=>Math.random()-.5);$("answers").innerHTML="";
+ options.forEach(x=>{let b=document.createElement("button");b.type="button";b.className="answer";b.textContent=x;b.addEventListener("click",()=>answerQuiz(b,x,correct));$("answers").appendChild(b)});
+}
+function answerQuiz(btn,x,correct){
+ document.querySelectorAll("#answers .answer").forEach(b=>b.disabled=true);
+ if(x===correct){btn.classList.add("correct");score+=10;streak++;$("quizFeedback").className="feedback good";$("quizFeedback").innerHTML="Riktig! <strong>"+correct+"</strong>";}
+ else{btn.classList.add("wrong");streak=0;$("quizFeedback").className="feedback bad";$("quizFeedback").innerHTML="Ikke helt. Riktig svar er <strong>"+correct+"</strong>."}
+ done++;stats();$("quizNext").hidden=false;
+}
+$("quizNext").addEventListener("click",newQuiz);
+
+for(let h=1;h<=12;h++){let o=document.createElement("option");o.value=h;o.textContent=String(h);$("hour").appendChild(o)}
+for(let m=0;m<60;m++){let o=document.createElement("option");o.value=m;o.textContent=String(m).padStart(2,"0");$("minute").appendChild(o)}
+let setTime;
+function newSet(){setTime=randomTime();drawClock($("setClock"),setTime.h,setTime.m);$("setQuestion").textContent="Still klokka til: «"+phrase(setTime.h,setTime.m)+"»";$("setFeedback").innerHTML="";}
+$("checkSet").addEventListener("click",()=>{
+ let h=+$("hour").value,m=+$("minute").value;
+ if(h===setTime.h&&m===setTime.m){score+=15;streak++;$("setFeedback").className="feedback good";$("setFeedback").innerHTML="Riktig! "+fmt(h,m)+" er «"+phrase(h,m)+"»."}
+ else{streak=0;$("setFeedback").className="feedback bad";$("setFeedback").innerHTML="Prøv igjen. Riktig klokkeslett er <strong>"+fmt(setTime.h,setTime.m)+"</strong>."}
+ done++;stats();
+});
+$("newSet").addEventListener("click",newSet);
+
+let selectedTime=null,selectedPhrase=null;
+function newMatch(){
+ let arr=[],times=[];
+ while(arr.length<4){let t=randomTime();if(!arr.some(x=>x.h===t.h&&x.m===t.m))arr.push(t)}
+ times=[...arr].sort(()=>Math.random()-.5);
+ $("matchTimes").innerHTML="";$("matchPhrases").innerHTML="";selectedTime=null;selectedPhrase=null;$("matchFeedback").innerHTML="";
+ times.forEach(t=>{let b=document.createElement("button");b.type="button";b.className="item";b.textContent=fmt(t.h,t.m);b.dataset.key=fmt(t.h,t.m);b.addEventListener("click",()=>chooseTime(b,t));$("matchTimes").appendChild(b)});
+ [...arr].sort(()=>Math.random()-.5).forEach(t=>{let b=document.createElement("button");b.type="button";b.className="item";b.textContent=phrase(t.h,t.m);b.dataset.key=fmt(t.h,t.m);b.addEventListener("click",()=>choosePhrase(b,t));$("matchPhrases").appendChild(b)});
+}
+function chooseTime(b,t){if(b.classList.contains("done"))return;document.querySelectorAll("#matchTimes .item").forEach(x=>x.classList.remove("selected"));b.classList.add("selected");selectedTime=t;tryMatch()}
+function choosePhrase(b,t){if(b.classList.contains("done"))return;document.querySelectorAll("#matchPhrases .item").forEach(x=>x.classList.remove("selected"));b.classList.add("selected");selectedPhrase=t;tryMatch()}
+function tryMatch(){
+ if(!selectedTime||!selectedPhrase)return;
+ if(selectedTime.h===selectedPhrase.h&&selectedTime.m===selectedPhrase.m){
+  score+=10;streak++;done++;$("matchFeedback").className="feedback good";$("matchFeedback").textContent="Riktig par!";
+  document.querySelectorAll("#matchTimes .item").forEach(b=>{if(b.dataset.key===fmt(selectedTime.h,selectedTime.m)){b.classList.add("done");b.classList.remove("selected")}});
+  document.querySelectorAll("#matchPhrases .item").forEach(b=>{if(b.dataset.key===fmt(selectedPhrase.h,selectedPhrase.m)){b.classList.add("done");b.classList.remove("selected")}});
+ }else{$("matchFeedback").className="feedback bad";$("matchFeedback").textContent="Det passer ikke sammen. Prøv igjen.";streak=0;
+  document.querySelectorAll("#matchTimes .item,#matchPhrases .item").forEach(x=>x.classList.remove("selected"))}
+ selectedTime=null;selectedPhrase=null;stats();
+}
+$("newMatch").addEventListener("click",newMatch);
+
+newQuiz();
+
+// Lærerøvelse: læreren styrer klokkeslettet og viser sammenhengen.
+for (let h = 0; h <= 23; h++) {
+    const option = document.createElement("option");
+    option.value = h;
+    option.textContent = String(h).padStart(2, "0");
+    $("teacherHour").appendChild(option);
+}
+
+for (let m = 0; m < 60; m++) {
+    const option = document.createElement("option");
+    option.value = m;
+    option.textContent = String(m).padStart(2, "0");
+    $("teacherMinute").appendChild(option);
+}
+
+let teacherMode = "analog";
+
+function updateTeacherClock() {
+    const h = Number($("teacherHour").value);
+    const m = Number($("teacherMinute").value);
+
+    // Begge klokker tegnes alltid fra nøyaktig samme time og minutt.
+    drawClock($("teacherClock"), h, m);
+    // Vis begge mulige 24-timers klokkeslett for samme visning på analog klokke.
+    // For eksempel blir 05:09 vist som 05:09 / 17:09.
+    const firstHour = h % 12;
+    const secondHour = firstHour + 12;
+    $("teacherDigital").textContent =
+        fmt(firstHour, m) + " / " + fmt(secondHour, m);
+}
+
+function setTeacherMode(mode) {
+    teacherMode = mode;
+
+    $("teacherAnalogArea").hidden = mode !== "analog";
+    $("teacherDigitalArea").hidden = mode !== "digital";
+
+    $("showAnalogMode").className =
+        mode === "analog" ? "primary" : "secondary";
+    $("showDigitalMode").className =
+        mode === "digital" ? "primary" : "secondary";
+
+    $("teacherRelationNote").hidden = true;
+}
+
+function resetTeacherView() {
+    $("teacherAnalogArea").hidden = teacherMode !== "analog";
+    $("teacherDigitalArea").hidden = teacherMode !== "digital";
+    $("teacherRelationNote").hidden = true;
+}
+
+$("teacherHour").addEventListener("change", () => {
+    updateTeacherClock();
+    resetTeacherView();
+});
+
+$("teacherMinute").addEventListener("change", () => {
+    updateTeacherClock();
+    resetTeacherView();
+});
+
+$("showAnalogMode").addEventListener("click", () => setTeacherMode("analog"));
+$("showDigitalMode").addEventListener("click", () => setTeacherMode("digital"));
+
+$("revealTeacher").addEventListener("click", () => {
+    // Uansett valgt visning åpnes begge klokkene og viser samme tidspunkt.
+    $("teacherAnalogArea").hidden = false;
+    $("teacherDigitalArea").hidden = false;
+    $("teacherRelationNote").hidden = false;
+});
+
+$("hideTeacher").addEventListener("click", () => {
+});
+
+$("randomTeacher").addEventListener("click", () => {
+    const time = {
+        h: Math.floor(Math.random() * 24),
+        m: patterns[Math.floor(Math.random() * patterns.length)][1]
+    };
+    $("teacherHour").value = time.h;
+    $("teacherMinute").value = time.m;
+    updateTeacherClock();
+    resetTeacherView();
+});
+
+updateTeacherClock();
+
+</script>
+</body>
+</html>
